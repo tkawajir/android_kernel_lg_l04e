@@ -5,7 +5,7 @@ ui_print("");
 show_progress(0.500000, 0);
 
 ui_print("flashing recovery image...");
-package_extract_file("recovery.img", "/dev/block/mmcblk0p28");
+run_program("loki_flash", "recovery", "recovery.lok");
 show_progress(0.100000, 0);
 
 ui_print("flash complete. Enjoy!");

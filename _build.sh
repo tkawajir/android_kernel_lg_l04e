@@ -134,6 +134,24 @@ echo "----- Making $IMAGE_NAME ramdisk ------"
 echo "----- Making $IMAGE_NAME image ------"
 ./release-tools/mkbootimg --cmdline "vmalloc=600M console=ttyHSL0,115200,n8 lpj=67677 user_debug=31 msm_rtb.filter=0x0 ehci-hcd.park=3 coresight-etm.boot_enable=0 androidboot.hardware=geefhd" --kernel $BIN_DIR/kernel  --ramdisk $BIN_DIR/ramdisk-$IMAGE_NAME.img --base $KERNEL_BASE_ADDRESS --pagesize 2048 --ramdisk_offset $KERNEL_RAMDISK_OFFSET --output $BIN_DIR/$IMAGE_NAME.img
 
+# create cwm image
+cd $BIN_DIR
+if [ -d tmp ]; then
+  rm -rf tmp
+fi
+mkdir -p ./tmp/META-INF/com/google/android
+cp $IMAGE_NAME.img ./tmp/
+$KERNEL_DIR/release-tools/loki/loki_patch $IMAGE_NAME $KERNEL_DIR/release-tools/loki/aboot.img tmp/$IMAGE_NAME.img tmp/$IMAGE_NAME.lok
+rm tmp/$IMAGE_NAME.img
+cp $KERNEL_DIR/release-tools/update-binary ./tmp/META-INF/com/google/android/
+sed -e "s/@VERSION/$BUILD_LOCALVERSION/g" $KERNEL_DIR/release-tools/$BUILD_DEVICE/updater-script-$IMAGE_NAME.sed > ./tmp/META-INF/com/google/android/updater-script
+cd tmp && zip -rq ../cwm.zip ./* && cd ../
+SIGNAPK_DIR=$KERNEL_DIR/release-tools/signapk
+java -jar $SIGNAPK_DIR/signapk.jar $SIGNAPK_DIR/testkey.x509.pem $SIGNAPK_DIR/testkey.pk8 cwm.zip $BUILD_LOCALVERSION-$IMAGE_NAME-signed.zip
+rm cwm.zip
+rm -rf tmp
+echo "  $BIN_DIR/$BUILD_LOCALVERSION-$IMAGE_NAME-signed.zip"
+
 cd $KERNEL_DIR
 echo ""
 echo "=====> BUILD COMPLETE $BUILD_KERNELVERSION-$BUILD_LOCALVERSION"
