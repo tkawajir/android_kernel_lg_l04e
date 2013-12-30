@@ -102,7 +102,7 @@ if [ "$BUILD_SELECT" != 'image' -a "$BUILD_SELECT" != 'i' ]; then
   if [ -e make.log ]; then
     mv make.log make_old.log
   fi
-  nice -n 10 make O=$OBJ_DIR -j4 2>&1 | tee make.log
+  time nice -n 10 make O=$OBJ_DIR -j4 2>&1 | tee make.log
 fi
 
 # check compile error
@@ -141,8 +141,6 @@ if [ -d tmp ]; then
 fi
 mkdir -p ./tmp/META-INF/com/google/android
 cp $IMAGE_NAME.img ./tmp/
-$KERNEL_DIR/release-tools/loki/loki_patch $IMAGE_NAME $KERNEL_DIR/release-tools/loki/aboot.img tmp/$IMAGE_NAME.img tmp/$IMAGE_NAME.lok
-rm tmp/$IMAGE_NAME.img
 cp $KERNEL_DIR/release-tools/update-binary ./tmp/META-INF/com/google/android/
 sed -e "s/@VERSION/$BUILD_LOCALVERSION/g" $KERNEL_DIR/release-tools/$BUILD_DEVICE/updater-script-$IMAGE_NAME.sed > ./tmp/META-INF/com/google/android/updater-script
 cd tmp && zip -rq ../cwm.zip ./* && cd ../
