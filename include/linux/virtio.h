@@ -209,6 +209,11 @@ static inline bool virtqueue_enable_cb(struct virtqueue *vq)
 	return vq->vq_ops->enable_cb(vq);
 }
 
+static inline unsigned virtqueue_enable_cb_prepare(struct virtqueue *vq);
+
+static inline bool virtqueue_poll(struct virtqueue *vq, unsigned);
+
+
 /**
  * virtqueue_enable_cb_delayed - restart callbacks after disable_cb.
  * @vq: the struct virtqueue we're talking about.
