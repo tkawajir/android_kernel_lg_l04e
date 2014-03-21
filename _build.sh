@@ -56,7 +56,11 @@ mkdir -p $OBJ_DIR
 . $MOD_VERSION
 
 # check and get compiler
-. cross_compile
+if [ `uname` = "Darwin" ]; then
+  . cross_compile_darwin
+elif [ `uname` = "Linux" ]; then
+  . cross_compile_linux
+fi
 
 # set build env
 export ARCH=arm
@@ -127,12 +131,21 @@ mkdir -p $BIN_DIR
 
 # copy zImage
 cp $OBJ_DIR/arch/arm/boot/zImage $BIN_DIR/kernel
-echo "----- Making uncompressed $IMAGE_NAME ramdisk ------"
-./release-tools/mkbootfs $INITRAMFS_TMP_DIR > $BIN_DIR/ramdisk-$IMAGE_NAME.cpio
-echo "----- Making $IMAGE_NAME ramdisk ------"
-./release-tools/minigzip < $BIN_DIR/ramdisk-$IMAGE_NAME.cpio > $BIN_DIR/ramdisk-$IMAGE_NAME.img
-echo "----- Making $IMAGE_NAME image ------"
-./release-tools/mkbootimg --cmdline "vmalloc=600M console=ttyHSL0,115200,n8 lpj=67677 user_debug=31 msm_rtb.filter=0x0 ehci-hcd.park=3 coresight-etm.boot_enable=0 androidboot.hardware=geefhd" --kernel $BIN_DIR/kernel  --ramdisk $BIN_DIR/ramdisk-$IMAGE_NAME.img --base $KERNEL_BASE_ADDRESS --pagesize 2048 --ramdisk_offset $KERNEL_RAMDISK_OFFSET --output $BIN_DIR/$IMAGE_NAME.img
+if [ `uname` = "Darwin" ]; then
+  echo "----- Making uncompressed $IMAGE_NAME ramdisk ------"
+  ./release-tools/darwin/mkbootfs $INITRAMFS_TMP_DIR > $BIN_DIR/ramdisk-$IMAGE_NAME.cpio
+  echo "----- Making $IMAGE_NAME ramdisk ------"
+  ./release-tools/darwin/minigzip < $BIN_DIR/ramdisk-$IMAGE_NAME.cpio > $BIN_DIR/ramdisk-$IMAGE_NAME.img
+  echo "----- Making $IMAGE_NAME image ------"
+  ./release-tools/darwin/mkbootimg --cmdline "vmalloc=600M console=ttyHSL0,115200,n8 lpj=67677 user_debug=31 msm_rtb.filter=0x0 ehci-hcd.park=3 coresight-etm.boot_enable=0 androidboot.hardware=geefhd" --kernel $BIN_DIR/kernel  --ramdisk $BIN_DIR/ramdisk-$IMAGE_NAME.img --base $KERNEL_BASE_ADDRESS --pagesize 2048 --ramdisk_offset $KERNEL_RAMDISK_OFFSET --output $BIN_DIR/$IMAGE_NAME.img
+elif [ `uname` = "Linux" ]; then
+  echo "----- Making uncompressed $IMAGE_NAME ramdisk ------"
+  ./release-tools/linux/mkbootfs $INITRAMFS_TMP_DIR > $BIN_DIR/ramdisk-$IMAGE_NAME.cpio
+  echo "----- Making $IMAGE_NAME ramdisk ------"
+  ./release-tools/linux/minigzip < $BIN_DIR/ramdisk-$IMAGE_NAME.cpio > $BIN_DIR/ramdisk-$IMAGE_NAME.img
+  echo "----- Making $IMAGE_NAME image ------"
+  ./release-tools/linux/mkbootimg --cmdline "vmalloc=600M console=ttyHSL0,115200,n8 lpj=67677 user_debug=31 msm_rtb.filter=0x0 ehci-hcd.park=3 coresight-etm.boot_enable=0 androidboot.hardware=geefhd" --kernel $BIN_DIR/kernel  --ramdisk $BIN_DIR/ramdisk-$IMAGE_NAME.img --base $KERNEL_BASE_ADDRESS --pagesize 2048 --ramdisk_offset $KERNEL_RAMDISK_OFFSET --output $BIN_DIR/$IMAGE_NAME.img
+fi
 
 # create cwm image
 cd $BIN_DIR
