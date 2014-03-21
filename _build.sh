@@ -106,7 +106,7 @@ if [ "$BUILD_SELECT" != 'image' -a "$BUILD_SELECT" != 'i' ]; then
   if [ -e make.log ]; then
     mv make.log make_old.log
   fi
-  time nice -n 10 make O=$OBJ_DIR -j4 2>&1 | tee make.log
+  nice -n 10 make O=$OBJ_DIR -j4 2>&1 | tee make.log
 fi
 
 # check compile error
