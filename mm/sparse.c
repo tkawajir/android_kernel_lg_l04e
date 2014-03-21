@@ -487,6 +487,11 @@ void __init sparse_init(void)
 	int size2;
 	struct page **map_map;
 #endif
+	
+#ifdef CONFIG_HUGETLB_PAGE_SIZE_VARIABLE
+	/* Setup pageblock_order for HUGETLB_PAGE_SIZE_VARIABLE */
+	set_pageblock_order();
+#endif
 
 	/*
 	 * map is using big page (aka 2M in x86 64 bit)
